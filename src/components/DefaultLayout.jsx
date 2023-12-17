@@ -4,6 +4,8 @@ import axiosClient from "../axios-client.js";
 import {useEffect} from "react";
 import HeaderLayout from "./HeaderLayout.jsx";
 
+
+
 export default function DefaultLayout() {
   const {user, token, setUser, setToken, notification} = useStateContext();
 
@@ -38,6 +40,8 @@ export default function DefaultLayout() {
   
       <div className="content">
         <HeaderLayout/>
+  
+                                                                                                                                                        
         {/* <header>
           <div>
             Header

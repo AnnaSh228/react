@@ -91,7 +91,7 @@ export default function Login() {
     <div className="login-signup-form animated fadeInDown">
       <div className="form">
         <form onSubmit={onSubmit}>
-        <h1 className="title">Login into your account</h1>
+        <h1 className="title">Авторизация</h1>
           {errors &&
             <div className="alert">
               {Object.keys(errors).map(key => (
@@ -99,10 +99,10 @@ export default function Login() {
               ))}
             </div>
           }
-          <input ref={emailRef} type="email" placeholder="Email Address"/>
-          <input ref={passwordRef} type="password" placeholder="Password"/>
-          <button className="btn btn-block">Login</button>
-          <p className="message">Not registered? <Link to="/signup">Create an account</Link></p>
+          <input ref={emailRef} type="email" placeholder="Email"/>
+          <input ref={passwordRef} type="password" placeholder="Пароль"/>
+          <button className="btn btn-block">Войти</button>
+          {/* <p className="message">Not registered? <Link to="/signup">Create an account</Link></p> */}
         </form>
       </div>
     </div>

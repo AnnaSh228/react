@@ -67,7 +67,11 @@ const App = () => {
     });
     setOpenDropdown({ rowIndex: null, columnIndex: null });
   };
+  const [age, setAge] = React.useState('');
 
+  const handleChange = (event) => {
+    setAge(event.target.value);
+  };
   return (
     <div className="table-wrapper">
       <Header />

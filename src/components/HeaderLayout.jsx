@@ -37,16 +37,16 @@ export default function HeaderLayout() {
 
         <header>
           <div>
-          <Link to="/rateds">The journal of academic performance </Link> &nbsp; &nbsp;&nbsp; &nbsp;
-          <Link to="/users">Users</Link>
+          <Link to="/rateds">Журнал успеваемости </Link> &nbsp; &nbsp;&nbsp; &nbsp;
+          <Link to="/users">Пользователи</Link>
        
           </div>
  
 
           <div>
             {user.name} &nbsp; &nbsp;
-            
-            <a onClick={onLogout} className="btn-logout" href="#">Logout</a>
+            {/* <a  className="btn-logout" href="#">Рейтинг студентов</a> */}
+            <a onClick={onLogout} className="btn-logout" href="#">Выйти</a>
           </div>
         </header>
         

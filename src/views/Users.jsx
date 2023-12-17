@@ -40,25 +40,25 @@ export default function Users(){
     return (
       <div>
         <div style={{display: 'flex', justifyContent: "space-between", alignItems: "center"}}>
-          <h1>Users</h1>
-          <Link className="btn-add" to="/users/new">Add new</Link>
+          <h1>Пользователи</h1>
+          <Link className="btn-add" to="/users/new">Добавить нового</Link>
         </div>
         <div className="card animated fadeInDown">
           <table>
             <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
+              <th>ФИО</th>
               <th>Email</th>
-              <th>Create Date</th>
-              <th>Actions</th>
+              <th>Дата создания</th>
+              <th>Действия</th>
             </tr>
             </thead>
             {loading &&
               <tbody>
               <tr>
                 <td colSpan="5" class="text-center">
-                  Loading...
+                  Загрузка...
                 </td>
               </tr>
               </tbody>
@@ -72,9 +72,9 @@ export default function Users(){
                   <td>{u.email}</td>
                   <td>{u.created_at}</td>
                   <td>
-                    <Link className="btn-edit" to={'/users/' + u.id}>Edit</Link>
+                    <Link className="btn-edit" to={'/users/' + u.id}>Редактировать</Link>
                     &nbsp;
-                    <button className="btn-delete" onClick={ev => onDeleteClick(u)}>Delete</button>
+                    <button className="btn-delete" onClick={ev => onDeleteClick(u)}>Удалить</button>
                   </td>
                 </tr>
               ))}

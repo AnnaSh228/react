@@ -3,6 +3,7 @@ import axiosClient from "../axios-client.js";
 import {Link} from "react-router-dom";
 import {useNavigate, useParams} from "react-router-dom";
 import {useStateContext} from "../contexts/ContextProvider.jsx";
+import AsyncSelect from 'react-select/async';
 
 export default function Rateds(){
     const [users, setUsers] = useState([]);
@@ -20,11 +21,41 @@ export default function Rateds(){
       user_id: ''
     })
     const [selectedRatingId, setSelectedRatingId] = useState(null);
-    const [editedMarks, setEditedMarks] = useState({}); // Состояние для отслеживания измененных оценок
+    const [editedMarks, setEditedMarks] = useState({}); 
+    const [academicLoads, setAcademicLoads] = useState([]);
+    const [academicLoadsGroup, setAcademicLoadsGroup] = useState([]);
+    const [selectedCell, setSelectedCell] = useState({
+      userId: null,
+      lessonId: null,
+    });
+    const [openDropdown, setOpenDropdown] = useState({
+      userId: null,
+      lessonId: null,
+    });
+    useEffect(() => {
+      const fetchData = async () => {
+        
+        const result = await axiosClient.get('/disciplinename'); 
+        setAcademicLoads(result.data);
 
+      };
+      fetchData();
+    }, []);
+ 
+    useEffect(() => {
+      const fetchData = async () => {
+        
+        const result = await axiosClient.get('/studygroups'); 
+        setAcademicLoadsGroup(result.data);
+
+      };
+      fetchData();
+    }, []);
+ 
   
     useEffect(() => {
       getUsers();
+
       getRateds();
     }, [])
   
@@ -33,6 +64,7 @@ export default function Rateds(){
         axiosClient.get('/rateds')
           .then(({ data }) => {
             setLoading(false)
+       
             setRateds(data.data)
           })
           .catch(() => {
@@ -93,70 +125,198 @@ export default function Rateds(){
         setEditedMarks({ ...editedMarks, [key]: {ratedsIds, newValue} });
       };
 
+     
+    const onSubmit = async () => {
     
-    const onSubmit = async (ev) => {
-        ev.preventDefault();
-      debugger;
-        if (selectedRatingId) {
+  
+        const {id, mark, lessonId, userId} = currentMark;
+
+        console.log(id)
+
+        if(id) {
           try {
-           
-            await axiosClient.put(`/rateds/${selectedRatingId}`, {
-              mark: newValue, // Добавляем новую оценку для обновления
+         
+            await axiosClient.put(`/rateds/${id}`, {
+              mark: mark, 
             });
       
-            setNotification('User was successfully updated');
+            setNotification('Оценка успешно изменена');
             navigate('/rateds');
           } catch (error) {
           
           }
         } else {
-       
+          try {
+         
+            await axiosClient.post(`/rateds`, {
+              mark,
+              comment: '',
+              lesson_id: lessonId,
+              laboratory_work_id: 1,
+              user_id: userId
+            });
+      
+            setNotification('Оценка сохранена');
+            navigate('/rateds');
+          } catch (error) {
+          
+          }
         }
+     
       };
 
+     const [currentMark, setCurrentMark] = useState({}); 
+
+     console.log(rateds)
+     console.log(userIds)
+     
+     const handleCellClick = (userId, lessonId) => {
+      if (lessonId !== 0) {
+        setSelectedCell({ userId, lessonId });
+        setOpenDropdown({ userId, lessonId });
+      }
+    };
+
+  
     return (
       <div>
-        <div style={{display: 'flex', justifyContent: "space-between", alignItems: "center"}}>
-          <h1>Study group</h1>
-          <h1>Discipline</h1>
-          <Link className="btn-add" >Genetare a report</Link>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <select>
+              <option value="" disabled selected hidden>
+                Выберите группу
+              </option>
+              {academicLoadsGroup.map((load) => (
+                <option key={load.id} value={load.study_group_id}>
+                  {load.title}
+                </option>
+              ))}
+            </select>
+            &nbsp; &nbsp;&nbsp; &nbsp;
+            <select>
+              <option value="" disabled selected hidden>
+                Выберите дисциплину
+              </option>
+              {academicLoads.map((load) => (
+                <option key={load.id} value={load.discipline_id}>
+                  {load.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Link className="btn-add">Создать отчет</Link>
         </div>
         <div className="card animated fadeInDown">
+          <table>
+            <thead>
+              <tr>
+                <th>ФИО</th>
+                {lessonIds.map((lessonId) => (
+                  <th key={lessonId}>Lesson {lessonId}</th>
+                ))}
+                <th>
+                  {" "}
+                  <button>+</button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {userIds.map((userId) => (
+                <tr key={userId}>
+                  <td>{usersMap[userId]}</td>
 
-        <table>
-        <thead>
-          <tr>
-            <th>User ID</th>
-            {lessonIds.map((lessonId) => (
-              <th key={lessonId}>Lesson {lessonId}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {userIds.map((userId) => (
-            <tr key={userId}>
-              <td>{userId}</td>
-              {lessonIds.map((lessonId) => (
-                <td 
-                key={`${userId}_${lessonId}`}
-               
-                contentEditable="true"
-                onClick={(e) => {
-                    const newValue = e.currentTarget.innerText;
-                    const ratingId = rateds.find(item => item.user_id === userId && item.lesson_id === lessonId)?.id || null;
-                    setSelectedRatingId(ratingId);
-                    addNewMark(ratingId, userId, lessonId, newValue);
-                   
-                  }} >
-                    {rateds.find(item => item.user_id === userId && item.lesson_id === lessonId)?.mark || ''}
-                {/* {groupedData[`${userId}_${lessonId}`] || ' '} */}
-                </td>
+                  {lessonIds.map((lessonId) => (
+                    <td
+                      key={`${userId}_${lessonId}`}
+                      contentEditable="true"
+                      suppressContentEditableWarning="true"
+                      style={{ position: "relative" }}
+                      // onInput={(e) => {
+                      //   console.log(e.target.innerText);
+                      //   console.log(
+                      //     `ID: ${
+                      //       rateds.find(
+                      //         (item) =>
+                      //           item.user_id === userId &&
+                      //           item.lesson_id === lessonId
+                      //       )?.id || null
+                      //     }`
+                      //   );
+                      //   const id =
+                      //     rateds.find(
+                      //       (item) =>
+                      //         item.user_id === userId &&
+                      //         item.lesson_id === lessonId
+                      //     )?.id || null;
+                      //   console.log(lessonId);
+                      //   setCurrentMark({
+                      //     id,
+                      //     lessonId,
+                      //     userId,
+                      //     mark: e.target.innerText,
+                      //   });
+                      // }}
+                      //onBlur={onSubmit}
+                      onClick={() => handleCellClick(userId, lessonId)} 
+                      // onClick={(e) => {
+                      //     const newValue = e.currentTarget.innerText;
+                      //     const ratingId = rateds.find(item => item.user_id === userId && item.lesson_id === lessonId)?.id || null;
+                      //     setSelectedRatingId(ratingId);
+                      //     addNewMark(ratingId, userId, lessonId, newValue);
+
+                      //   }}
+                    >
+                      {rateds.find(
+                        (item) =>
+                          item.user_id === userId && item.lesson_id === lessonId
+                      )?.mark || ""}
+
+
+
+                       {lessonId !== 0 &&
+                  openDropdown.userId === userId &&
+                  openDropdown.lessonId === lessonId ? (
+                    <div
+                      style={{
+                        position: "absolute",
+                        border: "1px solid black",
+                        padding: "20px",
+                        top: "55px",
+                        left: "50%",
+                        zIndex: "99",
+                        background: "rgb(186, 213, 255, 0.6)",
+                        transform: "translateX(-50%)" 
+                      }}
+                    >
+              <button className="btn-add" onClick={onSubmit}>
+              Сохранить
+            </button>
+                    </div>
+                  ) : (
+                    userId[lessonId]
+                  )}
+                      
+                      {/* {groupedData[`${userId}_${lessonId}`] || ' '} */}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    <button className="btn" onClick={onSubmit}>Сохранить</button>
+            </tbody>
+          </table>
+          <div>
+            <pre></pre>
+            <button className="btn-add" onClick={onSubmit}>
+              Сохранить
+            </button>
+          </div>
+
           {/* <table>
             <thead>
             <tr>
@@ -189,7 +349,7 @@ export default function Rateds(){
           </table> */}
         </div>
       </div>
-    )
+    );
 }
 
    

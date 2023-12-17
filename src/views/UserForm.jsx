@@ -62,12 +62,12 @@ export default function UserForm() {
 
   return (
     <>
-      {user.id && <h1>Update User: {user.name}</h1>}
-      {!user.id && <h1>New User</h1>}
+      {user.id && <h1>Обновить данные: {user.name}</h1>}
+      {!user.id && <h1>Новый пользователь:</h1>}
       <div className="card animated fadeInDown">
         {loading && (
           <div className="text-center">
-            Loading...
+            Загрузка...
           </div>
         )}
         {errors &&
@@ -83,7 +83,7 @@ export default function UserForm() {
             <input value={user.email} onChange={ev => setUser({...user, email: ev.target.value})} placeholder="Email"/>
             <input type="password" onChange={ev => setUser({...user, password: ev.target.value})} placeholder="Password"/>
             <input type="password" onChange={ev => setUser({...user, password_confirmation: ev.target.value})} placeholder="Password Confirmation"/>
-            <button className="btn">Save</button>
+            <button className="btn">Сохранить</button>
           </form>
         )}
       </div>
