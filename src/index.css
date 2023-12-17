@@ -33,7 +33,7 @@ input {
 }
 
 input:focus {
-    border-color: #5b08a7;
+    border-color: #7788A3;
 }
 
 .btn,
@@ -134,7 +134,7 @@ table > tbody > tr > td {
 }
 select {
   
-  width: 150px; 
+  width: 160px; 
   height: 30px;
   color: #27374D;
   background-color: rgb(186, 213, 255, 0.6);
