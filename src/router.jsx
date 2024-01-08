@@ -18,7 +18,7 @@ const router=createBrowserRouter([
         children:[
             {
                 path: '/',
-                element: <Navigate to='/users' />
+                element: <Navigate to='/rateds' />
                 
             },
             {
@@ -29,13 +29,13 @@ const router=createBrowserRouter([
                 path: '/rateds',
                 element: <Rateds/>
               },
+            // {
+            //     path: '/disciplines',
+            //     element: <UserForm key='userCreate' />
+            // },
             {
-                path: '/users/new',
-                element: <UserForm key='userCreate' />
-            },
-            {
-                path: '/users/:id',
-                element: <UserForm key="userUpdate" />
+                path: '/disciplines/:id',
+                element: <UserForm/>
               }
         ]
     },

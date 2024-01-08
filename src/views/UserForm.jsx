@@ -3,90 +3,128 @@ import {useEffect, useState} from "react";
 import axiosClient from "../axios-client.js";
 import {useStateContext} from "../contexts/ContextProvider.jsx";
 
+
+
+
 export default function UserForm() {
-  const navigate = useNavigate();
-  let {id} = useParams();
-  const [user, setUser] = useState({
-    id: null,
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: ''
-  })
-  const [errors, setErrors] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const {setNotification} = useStateContext()
+  const { id } = useParams();
+  const [disciplines, setDisciplines] = useState({});
+  const [errors, setErrors] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { setNotification } = useStateContext();
+  const [laboratoryWorks, setLaboratoryWorks] = useState([]);
 
-  if (id) {
-    useEffect(() => {
-      setLoading(true)
-      axiosClient.get(`/users/${id}`)
-        .then(({data}) => {
-          setLoading(false)
-          setUser(data)
-        })
-        .catch(() => {
-          setLoading(false)
-        })
-    }, [])
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [disciplineResponse, worksResponse] = await Promise.all([
+          axiosClient.get(`/disciplines/${id}`),
+          axiosClient.get(`/laboratory_works?discipline_id=${id}`)
+        ]);
+        setDisciplines(disciplineResponse.data);
+        setLaboratoryWorks(worksResponse.data);
+      } catch (error) {
+        setErrors(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const onSubmit = ev => {
-    ev.preventDefault()
-    if (user.id) {
-      axiosClient.put(`/users/${user.id}`, user)
-        .then(() => {
-          setNotification('User was successfully updated')
-          navigate('/users')
-        })
-        .catch(err => {
-          const response = err.response;
-          if (response && response.status === 422) {
-            setErrors(response.data.errors)
-          }
-        })
-    } else {
-      axiosClient.post('/users', user)
-        .then(() => {
-          setNotification('User was successfully created')
-          navigate('/users')
-        })
-        .catch(err => {
-          const response = err.response;
-          if (response && response.status === 422) {
-            setErrors(response.data.errors)
-          }
-        })
+    if (id) {
+      fetchData();
     }
-  }
+  }, [id]);
 
-  return (
-    <>
-      {user.id && <h1>Обновить данные: {user.name}</h1>}
-      {!user.id && <h1>Новый пользователь:</h1>}
-      <div className="card animated fadeInDown">
-        {loading && (
-          <div className="text-center">
-            Загрузка...
-          </div>
-        )}
-        {errors &&
-          <div className="alert">
-            {Object.keys(errors).map(key => (
-              <p key={key}>{errors[key][0]}</p>
-            ))}
-          </div>
-        }
-        {!loading && (
-          <form onSubmit={onSubmit}>
-            <input value={user.name} onChange={ev => setUser({...user, name: ev.target.value})} placeholder="Name"/>
-            <input value={user.email} onChange={ev => setUser({...user, email: ev.target.value})} placeholder="Email"/>
-            <input type="password" onChange={ev => setUser({...user, password: ev.target.value})} placeholder="Password"/>
-            <input type="password" onChange={ev => setUser({...user, password_confirmation: ev.target.value})} placeholder="Password Confirmation"/>
-            <button className="btn">Сохранить</button>
-          </form>
-        )}
-      </div>
-    </>
-  )
+  const formatDate = (deadline) => {
+    const formattedDate = new Date(deadline).toLocaleDateString('ru', {
+      month: "numeric",
+      day: "numeric",
+    });
+    return formattedDate;
+  };
+
+  const handleContentEditable = (index, field, value) => {
+      const updatedWorks = [...laboratoryWorks];
+      updatedWorks[index][field] = value;
+      setLaboratoryWorks(updatedWorks);
+    };
+
+  const saveChanges = async (workId) => {
+    setLoading(true);
+    try {
+      const updatedWorkIndex = laboratoryWorks.findIndex((work) => work.id === workId);
+      const updatedWork = laboratoryWorks[updatedWorkIndex];
+
+      await axiosClient.put(`/laboratory_works/${workId}`, updatedWork);
+      
+      setNotification('Изменения успешно сохранены');
+      const updatedWorks = [...laboratoryWorks];
+      updatedWorks[updatedWorkIndex] = updatedWork;
+      setLaboratoryWorks(updatedWorks);
+    } catch (error) {
+      setErrors(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+return (
+  <div>
+    {loading ? (
+      <p>Loading...</p>
+    ) : errors ? (
+      <p>Error: {errors.message}</p>
+    ) : laboratoryWorks && laboratoryWorks.length > 0 ? (
+      <>
+        <table style={{ borderCollapse: 'collapse', width: '800px' }}>
+        <thead>
+         <tr>
+           <th style={{ textAlign: 'center', width: '3px' }}>№</th>
+           <th style={{ textAlign: 'center' }}>Название работы</th>
+           <th style={{ textAlign: 'center'}}>Срок сдачи</th>
+           <th style={{ textAlign: 'center', width: '3px' }}>Максимум баллов</th>
+         </tr>
+       </thead>
+       <tbody>
+  {laboratoryWorks.map((work, index) => (
+    <tr key={work.id}>
+      <td style={{ backgroundColor: '#bad5ff26', textAlign: 'center', width: '3px' }}>{work.id}</td>
+      <td
+        style={{ width: '600px' }}
+        contentEditable
+        onBlur={(e) => handleContentEditable(index, 'title', e.target.innerText)}
+        suppressContentEditableWarning={true}
+      >
+        {work.title}
+      </td>
+      <td
+        style={{ width: '100px' }}
+        contentEditable
+        onBlur={(e) => handleContentEditable(index, 'deadline', e.target.innerText)}
+        suppressContentEditableWarning={true}
+      >
+        {formatDate(work.deadline)}
+      </td>
+      <td
+        style={{ width: '50px' }}
+        contentEditable
+        onBlur={(e) => handleContentEditable(index, 'maximum_score', e.target.innerText)}
+        suppressContentEditableWarning={true}
+      >
+        {work.maximum_score}
+      </td>
+      <td>
+        <button onClick={() => saveChanges(work.id)}>Save</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+        </table>
+        {/* <button onClick={saveChanges}>Save Changes</button> */}
+      </>
+    ) : (
+      <p>No laboratory works found for this discipline ID.</p>
+    )}
+  </div>
+);
 }
