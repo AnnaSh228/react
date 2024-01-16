@@ -38,7 +38,7 @@ export default function Signup() {
       <div className="form">
         <form onSubmit={onSubmit}>
    
-          <h1 className="title">Signup</h1>
+          <h1 className="title">Зарегистрироваться</h1>
           {errors &&
             <div className="alert">
               {Object.keys(errors).map(key => (
@@ -46,12 +46,12 @@ export default function Signup() {
               ))}
             </div>
           }
-          <input ref={nameRef} type="text" placeholder="Full Name"/>
-          <input ref={emailRef} type="email" placeholder="Email Address"/>
-          <input ref={passwordRef} type="password" placeholder="Password"/>
-          <input ref={passwordConfirmationRef} type="password" placeholder="Repeat Password"/>
-          <button className="btn btn-block">Signup</button>
-          <p className="message">Already registered? <Link to="/login">Sign In</Link></p>
+          <input ref={nameRef} type="text" placeholder="ФИО"/>
+          <input ref={emailRef} type="email" placeholder="Email"/>
+          <input ref={passwordRef} type="password" placeholder="Пароль"/>
+          <input ref={passwordConfirmationRef} type="password" placeholder="Повторите пароль"/>
+          <button className="btn btn-block">Зарегистрироваться</button>
+          <p className="message">Уже зарегистрированы? <Link to="/login">Войти</Link></p>
         </form>
       </div>
     </div>

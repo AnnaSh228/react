@@ -58,59 +58,39 @@ export default function Rateds() {
     getLessons();
   }, []);
   useEffect(() => {
-    if (selectedDisciplineId !== '' && selectedStudyGroupId !== '') {
+    if (selectedDisciplineId !== "" && selectedStudyGroupId !== "") {
       getRateds();
     }
   }, [selectedDisciplineId, selectedStudyGroupId]);
+  useEffect(() => {
+    if (selectedDisciplineId !== "" && selectedStudyGroupId !== "") {
+      getLessons();
+    }
+  }, [selectedDisciplineId, selectedStudyGroupId]);
 
+  useEffect(() => {
+    if (selectedStudyGroupId !== "") {
+      getUsers();
+    }
+  }, [selectedStudyGroupId]);
 
-  // const getRateds = () => {
-  //   setLoading(true);
-  //   axiosClient
-  //     .get("/rateds")
-  //     .then(({ data }) => {
-  //       setLoading(false);
-
-  //       setRateds(data.data);
-  //     })
-  //     .catch(() => {
-  //       setLoading(false);
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   if (selectedDisciplineId !== "" && selectedStudyGroupId !== "") {
-  //     setLoading(true);
-  //     axiosClient
-  //       .get(`/rateds?study_group_id=${selectedStudyGroupId}&discipline_id=${selectedDisciplineId}`)
-  //       .then(({ data }) => {
-  //         setLoading(false);
-  //         setRateds(data.data);
-  //         console.log(selectedDisciplineId);
-  //         console.log(selectedStudyGroupId);
-  //         console.log(rateds);
-  //       })
-  //       .catch(() => {
-  //         setLoading(false);
-       
-  //       });
-  //   }
-  // }, [selectedDisciplineId, selectedStudyGroupId]);
+ 
   const getRateds = () => {
-    if (selectedDisciplineId !== '' && selectedStudyGroupId !== '') {
+    if (selectedDisciplineId !== "" && selectedStudyGroupId !== "") {
       setLoading(true);
       axiosClient
-        .get(`/rateds?study_group_id=${selectedStudyGroupId}&discipline_id=${selectedDisciplineId}`)
+        .get(
+          `/rateds?study_group_id=${selectedStudyGroupId}&discipline_id=${selectedDisciplineId}`
+        )
         .then(({ data }) => {
           setLoading(false);
           setRateds(data.data);
-          console.log(selectedDisciplineId);
-          console.log(selectedStudyGroupId);
-          console.log(data.data); // используйте data.data, чтобы увидеть данные, которые пришли от сервера
+          // console.log(selectedDisciplineId);
+          // console.log(selectedStudyGroupId);
+          // console.log(data.data);
         })
         .catch(() => {
           setLoading(false);
-          // Обработка ошибок
         });
     }
   };
@@ -131,23 +111,30 @@ export default function Rateds() {
   }
 
   const getUsers = () => {
-    setLoading(true);
-    axiosClient
-      .get("/users")
-      .then(({ data }) => {
-        setLoading(false);
-        setUsers(data.data);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+    if (selectedStudyGroupId !== "") {
+      setLoading(true);
+      axiosClient
+        .get(`/users?study_group_id=${selectedStudyGroupId}`)
+        .then(({ data }) => {
+          setLoading(false);
+          setUsers(data.data);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    }
   };
 
   const getLessons = () => {
     axiosClient
-      .get("/lessons")
+      .get(
+        `/lessons?study_group_id=${selectedStudyGroupId}&discipline_id=${selectedDisciplineId}`
+      )
       .then(({ data }) => {
         setLessons(data.data);
+        console.log(selectedDisciplineId);
+        console.log(selectedStudyGroupId);
+        console.log(data.lessons);
       })
       .catch(() => {});
   };
@@ -165,6 +152,7 @@ export default function Rateds() {
       const formattedDate = new Intl.DateTimeFormat("ru", {
         month: "numeric",
         day: "numeric",
+        // year:"numeric"
       }).format(new Date(lesson.date_of_lesson));
 
       acc[lesson.id] = formattedDate;
@@ -186,26 +174,30 @@ export default function Rateds() {
     fetchLaboratoryWorks();
   }, []);
 
- 
+  const lessonIds = [...new Set(lessons.map((item) => item.id))];
 
-  //const lessonIds = [...new Set(lessons.map((item) => item.id))];
-  const lessonIds = [...new Set(rateds.map((item) => item.lesson_id))];
-  const userIds = [...new Set(rateds.map((item) => item.user_id))];
-  //const userIds = [...new Set(users.map((item) => item.id))];
+  // const lessonIds = [...new Set(rateds.map((item) => item.lesson_id))];
+  //const userIds = [...new Set(rateds.map((item) => item.user_id))];
+  const userIds = [...new Set(users.map((item) => item.id))];
   const uniqueLabIds = [
     ...new Set(rateds.map((item) => item.laboratory_work_id)),
   ];
   console.log(rateds);
-console.log(lessonIds);
-  const labOptions = uniqueLabIds.map((labId) => (
-    <option key={labId} value={labId}>
-      {labId}
-    </option>
-  ));
+  console.log(lessonIds);
 
   function getOptions(curruntLabId) {
     console.log(`id lab: ${curruntLabId}`);
-    const labOptions = uniqueLabIds.map((labId) => (
+    console.log(`id lab: ${uniqueLabIds}`);
+    // const labOptions = uniqueLabIds.map((labId) => (
+    //   <option key={labId} value={labId} selected={labId == curruntLabId}>
+    //     {labId}
+    //   </option>
+    // ));
+
+    // return labOptions;
+    const nonEmptyLabIds = uniqueLabIds.filter((labId) => labId !== null);
+
+    const labOptions = nonEmptyLabIds.map((labId) => (
       <option key={labId} value={labId} selected={labId == curruntLabId}>
         {labId}
       </option>
@@ -218,7 +210,7 @@ console.log(lessonIds);
     const { id, mark, lessonId, userId } = currentMark;
 
     console.log(id);
-
+    debugger;
     if (id) {
       try {
         await axiosClient.put(`/rateds/${id}`, {
@@ -248,6 +240,7 @@ console.log(lessonIds);
         });
         getRateds();
         setNotification("Оценка сохранена");
+        setLaboratoryWorks(null);
       } catch (error) {
         setNotification("Перепроверьте введенные значения!");
       }
@@ -255,8 +248,6 @@ console.log(lessonIds);
   };
 
   const [currentMark, setCurrentMark] = useState({});
-
- 
 
   const handleAddRated = async () => {
     const { lessonId, userId } = selectedCell;
@@ -283,22 +274,23 @@ console.log(lessonIds);
       setOpenDropdown({ userId, lessonId });
     }
   };
+
   const newLesson = async () => {
     const { id, mark, lessonId, userId } = currentMark;
     const currentDate = new Date();
-
     try {
+      const disciplineId = selectedDisciplineId;
+      const studygroup = selectedStudyGroupId;
       await axiosClient.post(`/lessons`, {
         comment: "new lesson",
         date_of_lesson: currentDate.toISOString(),
         lesson_type_id: 1,
-        academic_load_id: 1,
+        discipline_id: disciplineId,
+        study_group_id: studygroup,
       });
-
-      setNotification("Занятие добавлено");
+      setNotification("Добавлено новое занятие");
       getLessons();
     } catch (error) {
-      debugger;
       setNotification("error");
     }
   };
@@ -309,15 +301,9 @@ console.log(lessonIds);
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div className="contain">
         <div>
-              <select
+          <select
             onChange={(e) => setSelectedStudyGroupId(e.target.value)}
             value={selectedStudyGroupId}
           >
@@ -402,16 +388,11 @@ console.log(lessonIds);
                     onClick={() => handleCellClick(userId, lessonId)}
                     style={{ position: "relative" }}
                   >
-                    {/* {rateds.find(
-                      (item) =>
-                        item.user_id === userId && item.lesson_id === lessonId
-                    )?.mark || ""} */}
-
                     {rateds.find(
                       (item) =>
                         item.user_id === userId && item.lesson_id === lessonId
                     )?.mark === -1 ? (
-                      <span>H</span>
+                      <span className="n">H</span>
                     ) : (
                       rateds.find(
                         (item) =>
@@ -424,13 +405,7 @@ console.log(lessonIds);
                     openDropdown.lessonId === lessonId ? (
                       <div className="dropdown">
                         <select
-                          style={{
-                            padding: "5px",
-                            fontSize: "12px",
-                            color: "#27374D",
-                            width: "130px",
-                            background: "white",
-                          }}
+                          className="select-mark"
                           disabled={
                             rateds.find(
                               (item) =>
@@ -468,13 +443,7 @@ console.log(lessonIds);
                         <div>
                           <label>Введите балл: </label>
                           <input
-                            style={{
-                              padding: "5px",
-
-                              width: "50px",
-                              marginTop: "10px",
-                              color: "#27374D",
-                            }}
+                            className="input-mark"
                             type="text"
                             onChange={(e) => {
                               const id =
@@ -495,14 +464,7 @@ console.log(lessonIds);
                             }}
                           />
                         </div>
-                        <button
-                          style={{
-                            background: "white",
-                            marginTop: "-15px",
-                          }}
-                          className="btn-add"
-                          onClick={onSubmit}
-                        >
+                        <button className="btn-add-mark" onClick={onSubmit}>
                           Сохранить
                         </button>
                       </div>

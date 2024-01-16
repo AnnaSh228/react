@@ -38,7 +38,7 @@ export default function HeaderLayout() {
         <header>
           <div>
           <Link className="header-name" to="/rateds">Журнал успеваемости </Link> &nbsp; &nbsp;&nbsp; &nbsp;
-          {/* <Link to="/users">Пользователи</Link> */}
+        
        
           </div>
  
