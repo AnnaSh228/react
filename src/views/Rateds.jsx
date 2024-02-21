@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider.jsx";
 import AsyncSelect from "react-select/async";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCoffee } from '@fortawesome/free-solid-svg-icons'
+
+
 
 export default function Rateds() {
   const [users, setUsers] = useState([]);
@@ -335,6 +339,7 @@ export default function Rateds() {
           <Link className="btn-add">Создать отчет</Link>
         </div>
       </div>
+
       <div className="card animated fadeInDown">
         <table>
           <thead>
@@ -477,6 +482,11 @@ export default function Rateds() {
             ))}
           </tbody>
         </table>
+        <FontAwesomeIcon icon={faCoffee} />
+        <FontAwesomeIcon icon={faCoffee} />
+        <FontAwesomeIcon icon={faCoffee} />d
+        defw
+
       </div>
     </div>
   );
